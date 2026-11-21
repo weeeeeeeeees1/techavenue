@@ -12,9 +12,10 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const orden = searchParams.get('orden')
+    const email = (searchParams.get('email') || '').trim().toLowerCase()
 
-    if (!orden) {
-      return Response.json({ error: 'Numero de orden requerido' }, { status: 400 })
+    if (!orden || !email) {
+      return Response.json({ error: 'Numero de orden y correo requeridos' }, { status: 400 })
     }
 
     const supabase = createClient(
@@ -24,15 +25,18 @@ export async function GET(request) {
 
     const { data, error } = await supabase
       .from('pedidos')
-      .select('numero_orden, nombre, apellido, total, estado, created_at')
+      .select('numero_orden, nombre, apellido, total, estado, created_at, correo')
       .eq('numero_orden', orden)
       .single()
 
-    if (error || !data) {
+    // Mismo resultado si la orden no existe o si el correo no coincide: así no se
+    // puede enumerar qué órdenes existen solo con el número.
+    if (error || !data || (data.correo || '').trim().toLowerCase() !== email) {
       return Response.json({ pedido: null })
     }
 
-    return Response.json({ pedido: data })
+    const { correo, ...pedido } = data
+    return Response.json({ pedido })
   } catch (error) {
     console.error(error)
     return Response.json({ error: 'Error al buscar pedido' }, { status: 500 })
