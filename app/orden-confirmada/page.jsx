@@ -3,7 +3,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense, useEffect, useState } from 'react'
 
-function ConfirmacionTarjeta({ orden }) {
+function ConfirmacionTarjeta({ orden, email }) {
   const [pedido, setPedido] = useState(null)
   const [cargando, setCargando] = useState(true)
 
@@ -14,7 +14,7 @@ function ConfirmacionTarjeta({ orden }) {
 
     const buscar = async () => {
       try {
-        const res = await fetch('/api/estado-pedido?orden=' + encodeURIComponent(orden))
+        const res = await fetch('/api/estado-pedido?orden=' + encodeURIComponent(orden) + '&email=' + encodeURIComponent(email || ''))
         const data = await res.json()
         if (cancelado) return
         setPedido(data.pedido || null)
@@ -30,7 +30,7 @@ function ConfirmacionTarjeta({ orden }) {
     }
     buscar()
     return () => { cancelado = true }
-  }, [orden])
+  }, [orden, email])
 
   const confirmando = cargando || !pedido || pedido.estado === 'pendiente_pago'
 
@@ -87,7 +87,7 @@ function ConfirmacionContent() {
   // El redirect de ONVO solo trae "orden" (no confiamos en total/nombre por URL para un pago
   // con tarjeta); la transferencia bancaria sigue mandando esos params como siempre.
   if (totalParam === null && nombreParam === null) {
-    return <ConfirmacionTarjeta orden={orden} />
+    return <ConfirmacionTarjeta orden={orden} email={params.get('email') || ''} />
   }
 
   const total = Number(totalParam) || 0

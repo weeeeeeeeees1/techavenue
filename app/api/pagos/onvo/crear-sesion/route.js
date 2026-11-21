@@ -72,7 +72,7 @@ export async function POST(request) {
           description: p.nombre.slice(0, 200),
         })),
         customerEmail: correo,
-        redirectUrl: `${origin}/orden-confirmada?orden=${numeroOrden}`,
+        redirectUrl: `${origin}/orden-confirmada?orden=${numeroOrden}&email=${encodeURIComponent(correo)}`,
         cancelUrl: `${origin}/checkout?onvo_cancelado=1`,
         metadata: { numeroOrden },
       })

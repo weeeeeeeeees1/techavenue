@@ -19,18 +19,22 @@ const PASOS = [
 
 export default function EstadoPedidoPage() {
   const [numero, setNumero]   = useState('')
+  const [correo, setCorreo]   = useState('')
   const [pedido, setPedido]   = useState(null)
   const [cargando, setCargando] = useState(false)
   const [error, setError]     = useState(null)
 
   const buscar = async () => {
-    if (!numero.trim()) return
+    if (!numero.trim() || !correo.trim()) {
+      setError('Ingresá tu número de orden y el correo con el que hiciste el pedido.')
+      return
+    }
     setCargando(true); setError(null); setPedido(null)
     try {
-      const res  = await fetch('/api/estado-pedido?orden=' + encodeURIComponent(numero.trim()))
+      const res  = await fetch('/api/estado-pedido?orden=' + encodeURIComponent(numero.trim()) + '&email=' + encodeURIComponent(correo.trim()))
       const data = await res.json()
       if (data.pedido) setPedido(data.pedido)
-      else setError('No encontramos un pedido con ese numero. Verificá que sea correcto.')
+      else setError('No encontramos un pedido con ese número y correo. Verificá que ambos sean correctos.')
     } catch {
       setError('Hubo un error al buscar tu pedido. Intentá de nuevo.')
     } finally {
@@ -79,8 +83,21 @@ export default function EstadoPedidoPage() {
               {cargando ? 'Buscando...' : 'Buscar'}
             </button>
           </div>
+
+          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--gray-600)', display: 'block', margin: '18px 0 10px' }}>
+            Correo del pedido
+          </label>
+          <input
+            type="email"
+            value={correo}
+            onChange={e => setCorreo(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && buscar()}
+            placeholder="correo@email.com"
+            style={{ width: '100%', padding: '14px 18px', fontSize: 15, border: '1.5px solid var(--gray-200)', borderRadius: 6, fontFamily: 'var(--font-body)', outline: 'none', color: 'var(--black)' }}
+          />
+
           <div style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 8 }}>
-            Encontras el numero de orden en el correo de confirmacion que te enviamos.
+            Ingresá el número de orden y el correo con el que hiciste la compra (ambos están en el correo de confirmación).
           </div>
         </div>
 
