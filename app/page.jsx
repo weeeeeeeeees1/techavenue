@@ -2,8 +2,13 @@ import Slideshow from '@/components/Slideshow'
 import CategoriesGrid from '@/components/CategoriesGrid'
 import HeroCinematic from '@/components/HeroCinematic'
 import Link from 'next/link'
+import { getFeaturedSkus, getProductosPorSkus } from '@/lib/productos'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const skus = await getFeaturedSkus('destacados')
+  const mapa = await getProductosPorSkus(skus)
+  const slides = skus.map(s => mapa.get(s)).filter(Boolean)
+
   return (
     <>
       <HeroCinematic />
@@ -19,7 +24,7 @@ export default function HomePage() {
         <CategoriesGrid />
       </section>
 
-      <Slideshow />
+      <Slideshow slides={slides} />
 
       <div style={{background:'var(--black)', padding:0}}>
         <div className="banner-strip">

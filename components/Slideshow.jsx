@@ -1,23 +1,10 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { toSlug } from '@/lib/utils'
-import { useCatalogo } from '@/context/CatalogoContext'
 
-export default function Slideshow() {
-  const [skus, setSkus] = useState([])
+export default function Slideshow({ slides = [] }) {
   const [current, setCurrent] = useState(0)
   const timerRef = useRef(null)
-  const { productos } = useCatalogo()
-
-  useEffect(() => {
-    fetch('/api/destacados')
-      .then(r => r.json())
-      .then(d => setSkus((d.lista || []).map(x => x.sku)))
-  }, [])
-
-  const slides = skus
-    .map(sku => productos.find(p => p.sku === String(sku)))
-    .filter(Boolean)
 
   const goTo = (n) => setCurrent((n + slides.length) % slides.length)
   const next = () => goTo(current + 1)
