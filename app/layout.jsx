@@ -7,8 +7,29 @@ import { Analytics } from '@vercel/analytics/next'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
-  title: 'TechAvenue CR — Tecnología en Costa Rica',
+  metadataBase: new URL('https://techavenuecr.com'),
+  title: {
+    default: 'TechAvenue CR — Tecnología en Costa Rica',
+    template: '%s — TechAvenue CR',
+  },
   description: 'Comprá componentes, periféricos, laptops y accesorios en TechAvenue Costa Rica. Garantía oficial, envío a todo el país.',
+  applicationName: 'TechAvenue',
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    locale: 'es_CR',
+    url: '/',
+    siteName: 'TechAvenue CR',
+    title: 'TechAvenue CR — Tecnología en Costa Rica',
+    description: 'Componentes, periféricos, laptops y accesorios en Costa Rica. Garantía oficial, envío a todo el país.',
+    images: [{ url: '/TITULO.AMARILLO.NEGRO.png', alt: 'TechAvenue CR' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TechAvenue CR — Tecnología en Costa Rica',
+    description: 'Componentes, periféricos, laptops y accesorios en Costa Rica. Garantía oficial, envío a todo el país.',
+    images: ['/TITULO.AMARILLO.NEGRO.png'],
+  },
 }
 
 export const viewport = {

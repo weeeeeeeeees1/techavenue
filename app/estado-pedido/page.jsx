@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 
 const ESTADOS = {
   recibido:       { label: 'Pedido recibido',   desc: 'Tu pedido fue recibido correctamente. Estamos verificando tu pago.', step: 1, color: '#D97706', bg: '#FFFBEB' },
@@ -61,7 +62,7 @@ export default function EstadoPedidoPage() {
       </div>
 
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px clamp(16px, 5vw, 32px) 96px' }}>
-        <a href="/" className="page-back">← Inicio</a>
+        <Link href="/" className="page-back">← Inicio</Link>
 
         <div style={{ marginBottom: 40 }}>
           <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--gray-600)', display: 'block', marginBottom: 10 }}>
