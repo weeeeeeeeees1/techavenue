@@ -218,7 +218,7 @@ export default function CheckoutPage() {
             {items.map(p => (
               <div key={p.id} style={{ display: 'flex', gap: 10, marginBottom: 12, alignItems: 'center' }}>
                 <div style={{ width: 44, height: 44, background: 'var(--gray-100)', borderRadius: 6, flexShrink: 0, overflow: 'hidden' }}>
-                  {p.imagen && <img src={p.imagen} alt={p.nombre} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }} />}
+                  {p.imagen && <img src={p.imagen} alt={p.nombre} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }} />}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--black)' }}>{p.nombre}</div>
