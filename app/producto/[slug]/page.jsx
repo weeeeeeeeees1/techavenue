@@ -2,6 +2,7 @@ import { cache } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getProducto } from '@/lib/productos'
+import { descripcionAuto } from '@/lib/descripcion'
 import AgregarAlCarrito from './AgregarAlCarrito'
 
 const CATEGORIA_LABEL = {
@@ -70,6 +71,10 @@ export default async function ProductoPage({ params }) {
   const specs = Object.entries(SPECS_LABELS)
     .filter(([key]) => producto[key])
     .map(([key, label]) => ({ label, valor: producto[key] }))
+
+  // Divia casi nunca trae detalle; si falta, generamos una descripción desde el nombre.
+  const detalleTexto = (producto.detalle || '').trim()
+  const auto = detalleTexto ? null : descripcionAuto(producto)
 
   const canonical = `https://techavenuecr.com/producto/${producto.slug || 'p'}-${producto.id}`
   const jsonLd = {
@@ -167,6 +172,25 @@ export default async function ProductoPage({ params }) {
             </svg>
             Consultar por WhatsApp
           </a>
+
+          <div style={{ marginTop: 40, borderTop: '1px solid var(--gray-200)', paddingTop: 32 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--gray-600)', marginBottom: 16 }}>
+              Descripción
+            </div>
+            <p style={{ fontSize: 14, color: 'var(--gray-700)', lineHeight: 1.65, margin: 0 }}>
+              {detalleTexto || auto.intro}
+            </p>
+            {!detalleTexto && auto.caracteristicas.length > 0 && (
+              <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 8 }}>
+                {auto.caracteristicas.map((c, i) => (
+                  <li key={i} style={{ fontSize: 13, color: 'var(--black)', display: 'flex', gap: 8, alignItems: 'baseline' }}>
+                    <span style={{ color: '#1E3A8A', flexShrink: 0, fontWeight: 700 }}>•</span>
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           {specs.length > 0 && (
             <div style={{ marginTop: 40, borderTop: '1px solid var(--gray-200)', paddingTop: 32 }}>
