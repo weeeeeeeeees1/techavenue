@@ -61,15 +61,27 @@ export default async function Page({ params, searchParams }) {
     getMarcasPorCategoria(nombre),
   ])
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: 'https://techavenuecr.com/' },
+      { '@type': 'ListItem', position: 2, name: nombreBonito(nombre), item: `https://techavenuecr.com/categoria/${nombre}` },
+    ],
+  }
+
   return (
-    <CategoryView
-      categoria={nombre}
-      nombreCategoria={nombreBonito(nombre)}
-      productos={productos}
-      total={total}
-      marcas={marcas}
-      filtros={filtros}
-      perPage={PER_PAGE}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <CategoryView
+        categoria={nombre}
+        nombreCategoria={nombreBonito(nombre)}
+        productos={productos}
+        total={total}
+        marcas={marcas}
+        filtros={filtros}
+        perPage={PER_PAGE}
+      />
+    </>
   )
 }

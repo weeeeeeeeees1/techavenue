@@ -111,6 +111,12 @@ export default function CategoryView({ categoria, nombreCategoria, productos, to
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '48px clamp(12px, 4vw, 32px) 96px' }}>
 
+      <nav aria-label="Ruta de navegación" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--gray-500)', marginBottom: 20 }}>
+        <Link href="/" style={{ color: 'var(--gray-500)', textDecoration: 'none' }}>Inicio</Link>
+        <span style={{ color: 'var(--gray-300)' }}>/</span>
+        <span style={{ color: 'var(--black)', fontWeight: 600 }}>{nombreCategoria}</span>
+      </nav>
+
       <div style={{ marginBottom: 36 }}>
         {/* eslint-disable-next-line react/jsx-no-comment-textnodes */}
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1E3A8A', marginBottom: 8 }}>
