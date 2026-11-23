@@ -1,8 +1,9 @@
 import { cache } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getProducto } from '@/lib/productos'
+import { getProducto, getRelacionados } from '@/lib/productos'
 import { descripcionAuto } from '@/lib/descripcion'
+import ProductCard from '@/components/ProductCard'
 import AgregarAlCarrito from './AgregarAlCarrito'
 
 const CATEGORIA_LABEL = {
@@ -68,6 +69,8 @@ export default async function ProductoPage({ params }) {
   const producto = await obtenerProducto(idDeSlug(slug))
   if (!producto) notFound()
 
+  const relacionados = await getRelacionados(producto, 8)
+
   const specs = Object.entries(SPECS_LABELS)
     .filter(([key]) => producto[key])
     .map(([key, label]) => ({ label, valor: producto[key] }))
@@ -95,9 +98,22 @@ export default async function ProductoPage({ params }) {
     },
   }
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: 'https://techavenuecr.com/' },
+      ...(producto.categoria
+        ? [{ '@type': 'ListItem', position: 2, name: CATEGORIA_LABEL[producto.categoria] || producto.categoria, item: `https://techavenuecr.com/categoria/${producto.categoria}` }]
+        : []),
+      { '@type': 'ListItem', position: producto.categoria ? 3 : 2, name: producto.nombre, item: canonical },
+    ],
+  }
+
   return (
     <div className="product-detail-wrap">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       <div className="product-detail-breadcrumb">
         <Link href="/" style={{ color: 'var(--gray-400)', textDecoration: 'none' }}>Inicio</Link>
@@ -162,7 +178,7 @@ export default async function ProductoPage({ params }) {
           </Link>
 
           <a
-            href="https://wa.me/50663409795"
+            href={`https://wa.me/50663409795?text=${encodeURIComponent(`Hola, me interesa este producto: ${producto.nombre} — ${canonical}`)}`}
             target="_blank"
             rel="noreferrer"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#16A34A', fontWeight: 600, textDecoration: 'none', marginTop: 24 }}
@@ -209,6 +225,17 @@ export default async function ProductoPage({ params }) {
           )}
         </div>
       </div>
+
+      {relacionados.length > 0 && (
+        <div style={{ marginTop: 64, borderTop: '1px solid var(--gray-200)', paddingTop: 40 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1E3A8A', marginBottom: 20 }}>
+            Productos similares
+          </div>
+          <div className="catalogo-grid">
+            {relacionados.map(p => <ProductCard key={p.id} p={p} />)}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
