@@ -18,7 +18,6 @@ const CATEGORIA_LABEL = {
 const SPECS_LABELS = {
   marca:           'Marca',
   tipo_periferico: 'Tipo',
-  subcategoria:    'Subcategoría',
 }
 
 // cache(): generateMetadata y la página comparten una sola consulta por request.
