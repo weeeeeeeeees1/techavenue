@@ -1,97 +1,99 @@
-'use client'
-import { useState, use } from 'react'
+import { cache } from 'react'
 import Link from 'next/link'
-import { useCarrito } from '@/context/CartContext'
-import { useToast } from '@/components/Toast'
-import { useCatalogo } from '@/context/CatalogoContext'
+import { notFound } from 'next/navigation'
+import { getProducto } from '@/lib/productos'
+import AgregarAlCarrito from './AgregarAlCarrito'
 
 const CATEGORIA_LABEL = {
-  'gpu':            'Tarjetas Gráficas',
-  'cpu':            'Procesadores',
-  'placas-madre':   'Placas Madre',
-  'ram':            'Memoria RAM',
-  'almacenamiento': 'Almacenamiento',
-  'perifericos':    'Periféricos',
-  'gabinetes':      'Gabinetes',
-  'refrigeracion':  'Refrigeración',
-  'psu':            'Fuentes de Poder',
-  'redes':          'Redes',
+  'componentes':            'Componentes',
+  'perifericos':            'Periféricos',
+  'accesorios':             'Accesorios',
+  'energia-y-conectividad': 'Energía y Conectividad',
+  'streaming-y-gaming':     'Streaming y Gaming',
+  'computadoras':           'Computadoras',
+  'hogar':                  'Hogar',
+  'software':               'Software',
 }
 
 const SPECS_LABELS = {
-  marca:               'Marca',
-  socket:              'Socket',
-  nucleos:             'Núcleos',
-  frecuencia:          'Frecuencia',
-  capacidad:           'Capacidad',
-  vram:                'Memoria VRAM',
-  tipo_gpu:            'Fabricante GPU',
-  tipo_almacenamiento: 'Tipo',
-  factor_forma:        'Factor de forma',
-  tipo_periferico:     'Tipo',
-  tipo_refrigeracion:  'Tipo de refrigeración',
-  potencia:            'Potencia',
-  certificacion:       'Certificación',
-  tipo_red:            'Tipo de red',
+  marca:           'Marca',
+  tipo_periferico: 'Tipo',
+  subcategoria:    'Subcategoría',
 }
 
-export default function ProductoPage({ params }) {
-  const { slug } = use(params)
-  const id = slug.slice(slug.lastIndexOf('-') + 1)
-  const { productos, loading } = useCatalogo()
-  const producto = productos.find(p => String(p.id) === id)
-  const { agregar } = useCarrito()
-  const { mostrar } = useToast()
-  const [agregado, setAgregado] = useState(false)
+// cache(): generateMetadata y la página comparten una sola consulta por request.
+const obtenerProducto = cache((id) => getProducto(id))
 
-  if (loading) {
-    return (
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 32px 96px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
-          <div className="skeleton" style={{ aspectRatio: '1', borderRadius: 12 }} />
-          <div>
-            <div className="skeleton" style={{ height: 12, width: '30%', marginBottom: 16 }} />
-            <div className="skeleton" style={{ height: 40, width: '90%', marginBottom: 8 }} />
-            <div className="skeleton" style={{ height: 40, width: '70%', marginBottom: 24 }} />
-            <div className="skeleton" style={{ height: 56, width: '50%', marginBottom: 32 }} />
-            <div className="skeleton" style={{ height: 48, width: '100%', marginBottom: 12 }} />
-            <div className="skeleton" style={{ height: 48, width: '100%' }} />
-          </div>
-        </div>
-      </div>
-    )
-  }
+function idDeSlug(slug) {
+  return slug.slice(slug.lastIndexOf('-') + 1)
+}
 
-  if (!producto) {
-    return (
-      <div style={{ maxWidth: 600, margin: '0 auto', padding: '96px 32px', textAlign: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 72, color: 'var(--gray-200)', lineHeight: 1, marginBottom: 24 }}>404</div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(28px, 4vw, 40px)', color: 'var(--black)', letterSpacing: '-0.02em', marginBottom: 12 }}>
-          Producto no encontrado
-        </h1>
-        <p style={{ fontSize: 15, color: 'var(--gray-600)', lineHeight: 1.7, marginBottom: 40 }}>
-          Este producto no existe o todavía no está disponible en nuestro catálogo. Podés explorar todas nuestras categorías.
-        </p>
-        <Link href="/productos" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--black)', color: 'var(--white)', padding: '12px 28px', borderRadius: 6, fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
-          ← Ver catálogo completo
-        </Link>
-      </div>
-    )
+function descripcion(p) {
+  const base = (p.detalle || '').replace(/\s+/g, ' ').trim()
+  if (base.length >= 40) return base.slice(0, 160)
+  return `${p.nombre}. Comprá ${p.marca || 'tecnología'} en TechAvenue Costa Rica — garantía oficial y envío a todo el país.`.slice(0, 160)
+}
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params
+  const p = await obtenerProducto(idDeSlug(slug))
+  if (!p) return { title: 'Producto no encontrado' }
+
+  const canonical = `/producto/${p.slug || 'p'}-${p.id}`
+  const desc = descripcion(p)
+  const imagenes = p.imagen ? [p.imagen] : undefined
+
+  return {
+    title: p.nombre,
+    description: desc,
+    alternates: { canonical },
+    openGraph: {
+      type: 'website',
+      url: canonical,
+      title: p.nombre,
+      description: desc,
+      images: imagenes,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: p.nombre,
+      description: desc,
+      images: imagenes,
+    },
   }
+}
+
+export default async function ProductoPage({ params }) {
+  const { slug } = await params
+  const producto = await obtenerProducto(idDeSlug(slug))
+  if (!producto) notFound()
 
   const specs = Object.entries(SPECS_LABELS)
     .filter(([key]) => producto[key])
     .map(([key, label]) => ({ label, valor: producto[key] }))
 
-  const handleAgregar = () => {
-    agregar(producto)
-    mostrar(`${producto.nombre} agregado al carrito`)
-    setAgregado(true)
-    setTimeout(() => setAgregado(false), 2200)
+  const canonical = `https://techavenuecr.com/producto/${producto.slug || 'p'}-${producto.id}`
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: producto.nombre,
+    image: producto.imagen ? [producto.imagen] : undefined,
+    description: descripcion(producto),
+    sku: producto.sku || undefined,
+    mpn: producto.part_number || undefined,
+    brand: producto.marca ? { '@type': 'Brand', name: producto.marca } : undefined,
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'CRC',
+      price: producto.precio,
+      availability: producto.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      url: canonical,
+    },
   }
 
   return (
     <div className="product-detail-wrap">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className="product-detail-breadcrumb">
         <Link href="/" style={{ color: 'var(--gray-400)', textDecoration: 'none' }}>Inicio</Link>
@@ -149,27 +151,7 @@ export default function ProductoPage({ params }) {
             {producto.stock > 0 ? `En stock (${producto.stock} disponibles)` : 'Agotado'}
           </div>
 
-          <button
-            onClick={handleAgregar}
-            disabled={producto.stock === 0 || agregado}
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '14px 24px',
-              background: agregado ? '#16A34A' : producto.stock === 0 ? 'var(--gray-200)' : 'var(--black)',
-              color: producto.stock === 0 ? 'var(--gray-400)' : 'var(--white)',
-              border: 'none',
-              borderRadius: 8,
-              fontFamily: 'var(--font-body)',
-              fontWeight: 700,
-              fontSize: 15,
-              cursor: producto.stock === 0 || agregado ? 'not-allowed' : 'pointer',
-              transition: 'background 0.2s',
-              marginBottom: 12,
-            }}
-          >
-            {agregado ? '+ Agregado al carrito' : producto.stock === 0 ? 'Agotado' : 'Agregar al carrito'}
-          </button>
+          <AgregarAlCarrito producto={producto} />
 
           <Link href="/carrito" style={{ display: 'block', width: '100%', padding: '13px 24px', background: 'transparent', color: 'var(--black)', border: '1.5px solid var(--gray-200)', borderRadius: 8, fontWeight: 600, fontSize: 15, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box', transition: 'border-color 0.15s' }}>
             Ver carrito →
