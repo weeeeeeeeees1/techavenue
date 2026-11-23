@@ -24,7 +24,7 @@ export default function CarritoPage() {
         {items.map((p) => (
           <div key={p.id} style={{ display: 'flex', gap: 16, padding: '20px 0', borderBottom: '1px solid var(--gray-200)', alignItems: 'center' }}>
             <div style={{ width: 72, height: 72, background: 'var(--gray-100)', borderRadius: 8, flexShrink: 0, overflow: 'hidden' }}>
-              {p.imagen && <img src={p.imagen} alt={p.nombre} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />}
+              {p.imagen && <img src={p.imagen} alt={p.nombre} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--black)', marginBottom: 2 }}>{p.nombre}</div>

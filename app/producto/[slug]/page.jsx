@@ -117,7 +117,7 @@ export default function ProductoPage({ params }) {
               </div>
             )}
             {producto.imagen ? (
-              <img src={producto.imagen} alt={producto.nombre} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+              <img src={producto.imagen} alt={producto.nombre} decoding="async" fetchPriority="high" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
             ) : (
               <div style={{ color: 'var(--gray-400)', fontSize: 13 }}>Sin imagen</div>
             )}

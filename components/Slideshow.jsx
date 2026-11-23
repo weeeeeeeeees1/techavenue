@@ -67,7 +67,7 @@ export default function Slideshow() {
               {slides.map((s, i) => (
                 <div className="slide" key={i}>
                   <div className="slide-image-area">
-                    <img src={s.imagen} alt={s.nombre} onError={e => { e.target.style.opacity = '0' }} />
+                    <img src={s.imagen} alt={s.nombre} loading="lazy" decoding="async" onError={e => { e.target.style.opacity = '0' }} />
                     {s.en_oferta && <span className="product-badge badge-sale">Oferta</span>}
                   </div>
                   <div className="slide-info">
