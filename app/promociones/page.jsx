@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getFeaturedSkus, getProductosPorSkus } from '@/lib/productos'
+import { getFeaturedSkus, getProductosPorSkus, getProductosEnOferta } from '@/lib/productos'
 import ProductCard from '@/components/ProductCard'
 
 export const metadata = {
@@ -9,9 +9,19 @@ export const metadata = {
 }
 
 export default async function PromocionesPage() {
-  const skus = await getFeaturedSkus('promociones')
+  // La página combina dos fuentes y deduplica por id:
+  //  1) Lo que el admin agrega a mano (tabla "promociones", en su orden).
+  //  2) Todos los productos con descuento real de Divia (en_oferta), automáticamente.
+  // Así cualquier oferta aparece sola, sin que el cliente la agregue producto por producto.
+  const [skus, ofertas] = await Promise.all([
+    getFeaturedSkus('promociones'),
+    getProductosEnOferta(200),
+  ])
   const map = await getProductosPorSkus(skus)
-  const lista = skus.map(s => map.get(s)).filter(Boolean)
+  const curados = skus.map(s => map.get(s)).filter(Boolean)
+  const idsCurados = new Set(curados.map(p => p.id))
+  const automaticos = ofertas.filter(p => !idsCurados.has(p.id))
+  const lista = [...curados, ...automaticos]
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 32px 96px' }}>
