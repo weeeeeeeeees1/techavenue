@@ -7,7 +7,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "preserve",
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "6.0"
   },
   "include": ["**/*.js", "**/*.jsx", "next-env.d.ts"],
   "exclude": ["node_modules"]
